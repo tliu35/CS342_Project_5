@@ -5,6 +5,7 @@ package Rummy;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -25,18 +26,21 @@ public class GameGUI {
 	private JFrame superFrame;
 	
 	private JPanel Panel_East,Panel_West,Panel_South,Panel_North;
-	protected JPanel Panel_Center;
+	protected JPanel Panel_Center, melds_Panel;
 
-	private JTextArea messageArea, peopleArea;
+	private JTextArea messageArea, peopleArea, playArea;
 	private JTextField sendingMessage;
 	
 	private JMenu gameMenu, chatMenu, helpMenu, windowMenu;
 	private JMenuBar mainMenuBar;
 	private JMenuItem exitItem, startGameItem, startChatItem, exitChat, exitGame,helpItem, aboutItem;
 	
-	private JButton sendButton;
+	private JButton sendButton, drawButton, discardButton;
 	
 	public GameGUI(){
+		
+		//choose server
+		
 		superFrame = new JFrame("Rummy & Chat");
 		superFrame.setResizable(false);
 		
@@ -157,6 +161,24 @@ public class GameGUI {
 		//center panel is the game panel
 		Panel_Center.setSize(200, 500);
 		Panel_Center.setBackground(Color.green);
+		playArea = new JTextArea();
+		JScrollPane playScrollPane = new JScrollPane(playArea,
+				JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		playScrollPane.setPreferredSize(new Dimension(200,200));
+		
+		drawButton = new JButton("New Card");
+		discardButton = new JButton("Discarded Card");
+		
+		Panel_Center.setLayout(new BorderLayout());
+		Panel_Center.add(playScrollPane, BorderLayout.SOUTH);
+		Panel_Center.add(drawButton, BorderLayout.NORTH);
+		Panel_Center.add(discardButton, BorderLayout.NORTH);
+		
+		melds_Panel = new JPanel();
+		melds_Panel.setSize(200, 100);
+		melds_Panel.setBackground(Color.blue);
+		Panel_Center.add(melds_Panel, BorderLayout.CENTER);
 		
 		//add message display area on the east side
 		messageArea = new JTextArea("Chatting\n");
@@ -164,7 +186,7 @@ public class GameGUI {
         JScrollPane scrollPane = new JScrollPane(messageArea,
                 JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
                 JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        scrollPane.setPreferredSize(new Dimension(200, 500));
+        scrollPane.setPreferredSize(new Dimension(300, 500));
         Panel_East.add(scrollPane);
         
         // add online people display area on the west side
@@ -177,7 +199,7 @@ public class GameGUI {
 		Panel_West.add(scrollPane2);
 		
 		//add text typing field on the south side
-		sendingMessage = new JTextField(50);
+		sendingMessage = new JTextField(60);
 		sendButton = new JButton("Send");
 		sendButton.addActionListener(new ActionListener() {
 			
@@ -190,7 +212,10 @@ public class GameGUI {
 		Panel_South.add(sendingMessage);
 		Panel_South.add(sendButton);
 		
-		superFrame.setSize(800, 600);
+		superFrame.setSize(1000, 600);
+		superFrame.setLocation((Toolkit.getDefaultToolkit().getScreenSize().width-superFrame.getSize().width)/2,
+				(Toolkit.getDefaultToolkit().getScreenSize().height-superFrame.getSize().height)/2);
+			
 		superFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		superFrame.validate();
 		superFrame.setVisible(true);

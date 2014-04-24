@@ -1,5 +1,6 @@
 package Rummy;
 
+import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 
 public class TestGame {
@@ -10,7 +11,17 @@ public class TestGame {
 		}catch(Exception e){
 			System.out.print("The reason for failer is: "+e);
 		}
-		new GameGUI();
+		Object[] optionsObjects = {"Client", "Server"};
+		int input = JOptionPane.showOptionDialog(null, "Please choose to start a Server or Client window",
+				"Starting", JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE, null,
+				optionsObjects, optionsObjects[0]);
+		System.out.println("input is "  + input);
+		if(input == 1){
+			new ServerGUI();
+		}
+		else{
+			new GameGUI();
+		}
 	}
 	
 }
