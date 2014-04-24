@@ -1,37 +1,53 @@
-package Rummy;
+/**------------------------------------------------------------------------
+ * 		@author Adam Socik
+ * 		April 2014
+ * 		CS 342 Software Design
+ * 
+ * A card is a 2 character string with index 0 representing the rank of the
+ * card and index 1 representing the suit of the card.
+ * ------------------------------------------------------------------------*/
 
-public class Card{ 
-	private int rank, suit;
+public class Card
+{ 
+	private String card;
 	
-    private static String[] suits = { "C","D","H","S"};
-	private static String[] ranks= { "2","3","4","5","6","7","8","9","T","J","Q","K","A"};
-
-    public Card(int suit, int rank)
-    {
-
-        this.rank=rank;
-
-        this.suit=suit;
-    
-    }
-
-    public @Override String toString()
-    {
-
-          return ranks[rank] + suits[suit];
-    }
-
-    public int getRank() {
-
-         return rank;
-
-    }
-
-    public int getSuit() {
-
-        return suit;
-
-    }
-    
-}//end of class
+	public Card()
+	{
+		card = null;
+	}
+		
+	public void setCard(String s)
+	{
+		card = s;
+	}
+	
+	public String getCard()
+	{
+		return card;
+	}
+	
+	public char getRank()
+	{
+		return card.charAt(0);
+	}
+	
+	public char getSuit()
+	{
+		return card.charAt(1);
+	}   
+	
+	public int getNumericRank() 
+	{
+		char rank = getRank();
+		switch (rank) 
+		{
+			case 'K': return 13;
+			case 'Q': return 12;
+			case 'J': return 11;
+			case 'T': return 10;
+			case 'A': return 1;
+			default: return Character.getNumericValue(rank);
+		}
+	}
+}
 
