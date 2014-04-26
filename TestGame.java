@@ -6,8 +6,6 @@ public class TestGame
 {
 	public static void main(String[] args)
 	{
-		GameHandle gameHandle = new GameHandle(5); // for testing
-		
 		try{
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		}catch(Exception e){
@@ -22,7 +20,8 @@ public class TestGame
 			new ServerGUI();
 		}
 		else{
-			new GameGUI();
+			GameGUI gui =  new GameGUI();
+			//new GameHandle(5, gui); // for testing
 		}
 	}
 	

@@ -36,7 +36,11 @@ public class GameGUI {
 	
 	private JButton sendButton, drawButton, discardButton;
 	
-	public GameGUI(){
+	private Player player;
+	
+	public GameGUI()
+	{
+		//player = new Player(this, client, deck);
 		
 		//choose server
 		
@@ -218,6 +222,29 @@ public class GameGUI {
 		superFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		superFrame.validate();
 		superFrame.setVisible(true);
+	}
+	
+	
+	// @author Adam Socik
+	
+	/**
+	 * Notify player that card was drawn
+	 * 
+	 * @param from 0 = deck, 1 = discards pile 
+	 */
+	public void draw(int from) 
+	{
+		player.drawCard(from);
+	}
+	
+	public void setDiscardBtnText(String s)
+	{
+		discardButton.setText("Draw " + s);
+	}
+	
+	public JTextArea getPlayArea()
+	{
+		return playArea;
 	}
 	
 }

@@ -3,16 +3,15 @@
  * 		April 2014
  * 		CS 342 Software Design
  * 
+ * Class holds all variables and methods needed to manipulate a deck of cards
  * ------------------------------------------------------------------------*/
 import java.util.*;
-
-import org.w3c.dom.ls.LSException;
 
 public class Deck 
 {
 	private Vector<Card> deck;
 	private Vector<Card> discardPile;
-	private Vector<Vector<Card>> medls;
+	private Vector<Meld> medls;
 	
 	/**
 	 * The constructor initializes a deck and shuffles it for distribution.
@@ -22,7 +21,7 @@ public class Deck
 		// Prepare lists
 		deck = new Vector<Card>();
 		discardPile = new Vector<Card>();
-		medls = new Vector<Vector<Card>>();
+		medls = new Vector<Meld>();
 		for (int i=0; i<52; i++)
 			deck.add(new Card());
 		
@@ -83,7 +82,7 @@ public class Deck
 		
 		// Shuffle the deck twice for good measure 
 		Collections.shuffle(deck);
-		Collections.shuffle(deck);		
+		Collections.shuffle(deck);	
 	}
 	
 	/**
@@ -106,10 +105,13 @@ public class Deck
 		for (int i=0; i<numOfCards; i++)
 			for (int j=0; j<players.size(); j++)
 				players.get(j).getHand().add(drawCard());
+		
+		// Take top card from deck and add it to the discard pile
+		discardPile.add(drawCard());
 	}
 
 	/**
-	 * Removes first card from list and returns it to caller
+	 * Removes first card from deck and returns it to caller
 	 * 
 	 * @return card
 	 */
@@ -119,6 +121,22 @@ public class Deck
 		Card c = deck.get(0);
 		deck.remove(0);
 		return c;
+	}
+	
+	/**
+	 * Removes first card from discard list and returns it to caller
+	 * 
+	 * @return card
+	 */
+	public Card drawCardFromDiscard()
+	{
+		if (discardPile.size() > 0)
+		{
+			Card card = discardPile.get(0);
+			discardPile.remove(0);
+			return card;
+		}
+		return null;
 	}
 	
 	/**
@@ -141,8 +159,31 @@ public class Deck
 		}
 	}
 	
+	/**
+	 * Add the card to the top of the discard pile
+	 * 
+	 * @param card
+	 */
+	public void addToDiscardPile(Card card)
+	{
+		discardPile.add(0, card);
+	}
 	
+	/**
+	 * @return top of the discard pile
+	 */
+	public String getTopDiscardCard()
+	{
+		return discardPile.get(0).getCard();
+	}
 	
+	/**
+	 * @return list of melds for the deck
+	 */
+	public Vector<Meld> getMelds()
+	{
+		return medls;
+	}
 } 
 
 

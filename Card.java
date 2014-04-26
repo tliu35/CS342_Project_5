@@ -16,6 +16,11 @@ public class Card
 		card = null;
 	}
 		
+	public Card(String card)
+	{
+		this.card = card;
+	}
+	
 	public void setCard(String s)
 	{
 		card = s;
