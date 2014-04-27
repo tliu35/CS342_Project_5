@@ -107,6 +107,7 @@ public class GameGUI implements ActionListener {
 				button_Panel.add(startGameButton);
 				button_Panel.add(serverConnectButton);
 				button_Panel.add(serverDisconnectButton);
+				button_Panel.add(serverPrivButton);
 				
 				commonGUI();
 		
@@ -119,12 +120,14 @@ public class GameGUI implements ActionListener {
 		discardButton = new JButton("Discarded Card");
 		clientConnectButton = new JButton("Connect");
 		clientDisconnectButton = new JButton("Disconnect");
+		clientPrivButton = new JButton("Private Chat");
 		
-		button_Panel = new JPanel(new GridLayout(2,2));
+		button_Panel = new JPanel(new GridLayout(2,3));
 		button_Panel.add(drawButton);
 		button_Panel.add(discardButton);
 		button_Panel.add(clientConnectButton);
 		button_Panel.add(clientDisconnectButton);
+		button_Panel.add(clientPrivButton);
 		
 		commonGUI();
 	}
