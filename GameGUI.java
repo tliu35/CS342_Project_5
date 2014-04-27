@@ -49,7 +49,7 @@ public class GameGUI implements ActionListener {
 	
 	private Player player;
 	
-	private String userName;
+	private String userName, portString;
 	private int serverPort, clientPort;
 	
 	private String privateMessagePeople;
@@ -69,7 +69,7 @@ public class GameGUI implements ActionListener {
 		
 		if(input == 1){
 			// get the port number
-			String portString = JOptionPane.showInputDialog("Please enter a port number");
+			portString = JOptionPane.showInputDialog("Please enter a port number");
 			serverPort = Integer.parseInt(portString);
 			
 			setServerGUI();
@@ -86,6 +86,7 @@ public class GameGUI implements ActionListener {
 	
 	private void setServerGUI(){
 		// set up the buttons for server
+
 				drawButton = new JButton("New Card");
 				discardButton = new JButton("Discarded Card");
 				startGameButton = new JButton("Start Game");
@@ -109,7 +110,10 @@ public class GameGUI implements ActionListener {
 				button_Panel.add(serverDisconnectButton);
 				button_Panel.add(serverPrivButton);
 				
-				commonGUI();
+				String displayString = "Server "+portString;
+				
+				commonGUI(displayString);
+				
 		
 	}
 		
@@ -129,13 +133,13 @@ public class GameGUI implements ActionListener {
 		button_Panel.add(clientDisconnectButton);
 		button_Panel.add(clientPrivButton);
 		
-		commonGUI();
+		commonGUI(userName);
 	}
 		
-	private void commonGUI(){
+	private void commonGUI(String display){
 		//choose server
 		
-				superFrame = new JFrame(userName);
+				superFrame = new JFrame(display);
 				superFrame.setResizable(false);
 				
 				mainMenuBar = new JMenuBar();
