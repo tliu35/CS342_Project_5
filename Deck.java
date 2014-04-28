@@ -5,13 +5,18 @@
  * 
  * Class holds all variables and methods needed to manipulate a deck of cards
  * ------------------------------------------------------------------------*/
+import java.awt.BorderLayout;
+import java.awt.GridLayout;
 import java.util.*;
+
+import javax.swing.JComboBox;
+import javax.swing.JPanel;
 
 public class Deck 
 {
 	private Vector<Card> deck;
 	private Vector<Card> discardPile;
-	private Vector<Meld> medls;
+	private Vector<Meld> melds;
 	
 	/**
 	 * The constructor initializes a deck and shuffles it for distribution.
@@ -21,7 +26,7 @@ public class Deck
 		// Prepare lists
 		deck = new Vector<Card>();
 		discardPile = new Vector<Card>();
-		medls = new Vector<Meld>();
+		melds = new Vector<Meld>();
 		for (int i=0; i<52; i++)
 			deck.add(new Card());
 		
@@ -182,25 +187,44 @@ public class Deck
 	 */
 	public Vector<Meld> getMelds()
 	{
-		return medls;
+		return melds;
+	}
+	
+	
+	
+	public JPanel updateGUIMelds()
+	{
+		// Calculate the size of rows and columns 
+		int rows = 0;
+		int cols;
+		
+		// Max of 4 columns 
+		if (melds.size() < 4)
+			cols = melds.size();
+		else 
+			cols = 4;
+		
+		for (int i=0; i<melds.size(); i++)
+			if (i%4 == 0)
+				rows++;
+		
+		// Add for any extra melds
+		if (melds.size() % 4 != 0)
+			rows++;
+		
+		JPanel panel = new JPanel(new GridLayout(rows, cols));
+		
+		// Create a JComboBox for each meld
+		for (int i=0; i<melds.size(); i++)
+		{
+			JComboBox jcBox = new JComboBox(melds.get(i).getCards());
+			jcBox.setSelectedIndex(0);
+			panel.add(jcBox);
+		}
+	
+		return panel;
 	}
 } 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

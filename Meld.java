@@ -168,15 +168,35 @@ public class Meld
 		});
 	}
 	
-	
-	
-	
-	
-	public void updateGUIMelds()
+	/**
+	 * Converts the cards vector into a string array and returns it to be
+	 * used to create JComboBoxes
+	 * 
+	 * @return	String array of cards
+	 */
+	public String[] getCards()
 	{
+		String cds[] = new String[cards.size()];
 		
+		for (int i=0; i<cards.size(); i++)
+			cds[i] = cards.get(i);
+		
+		return cds;
 	}
-	
-	
-		
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

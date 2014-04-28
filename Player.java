@@ -8,6 +8,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Vector;
 
+import javax.swing.JPanel;
+
 public class Player 
 {
 	private Vector<Card> hand;
@@ -86,22 +88,13 @@ public class Player
 		{	
 			printHand();
 			
-			
-			
-			
-			
-			// ******************** TO DO: get input / error check it ********************
-			String string = "M 3 4 5";
-			
-			
-			
-			
-			
+			String string = gui.getGameInteractionArea().getText();
+			gui.getGameInteractionArea().setText(""); 	// Clear the text
 			String input[] = string.split("\\s+");	// Split string up by spaces
 			
 			if (input[0].compareTo("M") == 0)	// Meld
 			{
-				// Translate input to cards
+				// Translate input to cardo\0q	2	wy7i9o0-55 tvin
 				Vector<Card> tempCards = new Vector<Card>();
 				intputToCards(tempCards, input, 1);
 				sortCards(tempCards);
@@ -116,6 +109,9 @@ public class Player
 				{
 					deck.getMelds().add(meld);
 					removeCards(input, 1);
+					
+					// Update the melds for all users
+					gui.setMeldsPanel(deck.updateGUIMelds());
 					
 					/* ******************** TO DO: Send message to all users ********************
 					 * message: client.username + " created meld " + meld.getName() + "\n"
@@ -164,6 +160,9 @@ public class Player
 					deck.getMelds().add(meld);
 					removeCards(input, 2);
 					
+					// Update the melds for all users
+					gui.setMeldsPanel(deck.updateGUIMelds());
+					
 					/* ******************** TO DO: Send message to all users ********************
 					 * message: client.username + " laid off to meld " + meld.getName() + "\n"
 					 * 
@@ -200,7 +199,7 @@ public class Player
 				gui.getPlayArea().append("You entered an invalid command\n");
 			}
 		}
-		
+	
 		/* ******************** TO DO: Send message to server ********************
 		 * message: this client is done with its turn
 		 */

@@ -17,7 +17,7 @@ public class TestGame
 				optionsObjects, optionsObjects[0]);
 		System.out.println("input is "  + input);
 		if(input == 1){
-			new ServerGUI();
+			//new ServerGUI();
 		}
 		else{
 			GameGUI gui =  new GameGUI();

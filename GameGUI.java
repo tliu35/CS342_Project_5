@@ -2,7 +2,7 @@
  * @author Tongtong Liu
  * CS342 Project 5
  */
-package Rummy;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -13,6 +13,7 @@ import java.awt.event.ActionListener;
 import java.util.Random;
 
 import javax.swing.BorderFactory;
+import javax.swing.JApplet;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -36,6 +37,7 @@ public class GameGUI implements ActionListener {
 
 	private JTextArea messageArea, peopleArea, playArea;
 	private JTextArea clientMessageArea;
+	private JTextArea gameInteractionArea;
 	
 	private JTextField portTextField;
 	
@@ -272,9 +274,13 @@ public class GameGUI implements ActionListener {
 				
 				melds_Panel = new JPanel();
 				melds_Panel.setSize(200, 100);
-				melds_Panel.setBackground(Color.cyan);
-				Panel_Center.add(melds_Panel, BorderLayout.CENTER);
 				
+				JPanel gamePanel = new JPanel(new BorderLayout());
+				gameInteractionArea = new JTextArea("Type commands here");
+				JScrollPane scroll = new JScrollPane(gameInteractionArea);
+				gamePanel.add(scroll, BorderLayout.SOUTH);
+				gamePanel.add(melds_Panel, BorderLayout.CENTER);
+				Panel_Center.add(gamePanel, BorderLayout.CENTER);
 				
 				//add message display area on the east side
 				messageArea = new JTextArea("Chatting\n");
@@ -318,10 +324,6 @@ public class GameGUI implements ActionListener {
 				superFrame.setVisible(true);
 	} //common GUI
 		
-
-	
-	// @author Adam Socik
-
 	/**
 	 * Notify player that card was drawn
 	 * 
@@ -342,7 +344,10 @@ public class GameGUI implements ActionListener {
 		return playArea;
 	}
 
-
+	public JTextArea getGameInteractionArea()
+	{
+		return gameInteractionArea;
+	}
 	
 	/***************************
 	 * The setUsername method sets the username for a client based
@@ -436,6 +441,11 @@ public class GameGUI implements ActionListener {
 		return userName;
 	}
 
+	public void setMeldsPanel(JPanel newJPanel)
+	{
+		melds_Panel = newJPanel;
+	}
+	
 	public JTextArea getCurrentLine(){
 		return clientMessageArea;
 	}
