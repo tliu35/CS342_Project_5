@@ -2,328 +2,440 @@
  * @author Tongtong Liu
  * CS342 Project 5
  */
+import java.awt.*;
+import java.util.*;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.GridLayout;
-import java.awt.Toolkit;
+import javax.swing.*;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Random;
+import java.io.IOException;
 
-import javax.swing.BorderFactory;
-import javax.swing.JApplet;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.SwingConstants;
 import javax.swing.border.Border;
 
-public class GameGUI implements ActionListener {
-
+public class GameGUI extends JFrame implements ActionListener 
+{
+	private static final long serialVersionUID = 1L;
 	private JFrame superFrame;
-	
-	private JPanel Panel_East,Panel_West,Panel_South,Panel_North;
+	private JPanel Panel_East,connectionPanel,Panel_South,Panel_North;
 	protected JPanel Panel_Center, melds_Panel, button_Panel;
-
-	private JTextArea messageArea, peopleArea, playArea;
+	private JTextArea messageArea, playArea;
 	private JTextArea clientMessageArea;
 	private JTextArea gameInteractionArea;
-	
 	private JTextField portTextField;
-	
-	private JMenu gameMenu, chatMenu, helpMenu, windowMenu;
+	private JMenu gameMenu;
 	private JMenuBar mainMenuBar;
-	private JMenuItem exitItem, startGameItem, startChatItem, exitChat, exitGame,helpItem, aboutItem;
-	
-	private JButton sendButton, drawButton, discardButton, startGameButton;
-	private JButton serverConnectButton,serverDisconnectButton, serverPrivButton;
-	private JButton clientConnectButton,clientDisconnectButton, clientPrivButton;
-	
-	private Player player;
-	
-	private String userName, portString;
+	private JMenuItem exitItem,helpItem, aboutItem;
+	private JButton sendButton, drawButton, drawFromDiscardButton, startGameButton;
+	private JButton disconnectButton;
+	private JButton clientConnectButton;
+	private String userName;
 	private int serverPort, clientPort;
-	
 	private String privateMessagePeople;
 	private String privateMessageContent;
 	private Client client;
 	private ServerHandle server;
+	private JButton serverButton;
+	private JButton clientButton;
+	private JButton serverConnect;
+	private JButton privateMessageButton;
+	private JButton enterCommand;
+	private JPanel firstPanel;
+	private JLabel connectedUsers;
+		
+	/**
+	 * Constructs the basic GUI that asks the user if they are a server or client 
+	 */
+	public GameGUI()
+	{
+		super("Chat Client");
+		setSize(200,100);
+		firstPanel = new JPanel();
 
-/***************************************************/	
-	public GameGUI(){
+		// Ask if the user is a server or client
+		firstPanel.setLayout(new FlowLayout());
+		JLabel welcomeLabel = new JLabel("Are you a server or client? ");
+		serverButton = new JButton("Server");
+		serverButton.addActionListener(this);
+		clientButton = new JButton("Client");
+		clientButton.addActionListener(this);
+
+		firstPanel.add(welcomeLabel);
+		firstPanel.add(serverButton);
+		firstPanel.add(clientButton);
+
+		add(firstPanel);
+		setLocationRelativeTo(null);
+		setVisible(true);
 		
-		Object[] optionsObjects = {"Client", "Server"};
-		int input = JOptionPane.showOptionDialog(null, "Please choose to start a Server or Client window",
-				"Starting", JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE, null,
-				optionsObjects, optionsObjects[0]);
-		//System.out.println(input);
+		clientButton.addActionListener(new ActionListener() 
+		{
+			@Override
+			public void actionPerformed(ActionEvent e) 
+			{
+				setDefaultGUI(1);
+			}
+		});
 		
-		
-		if(input == 1){
-			// get the port number
-			portString = JOptionPane.showInputDialog("Please enter a port number");
-			serverPort = Integer.parseInt(portString);
-			
-			setServerGUI();
-		}
-		else if(input == 0){	// choose to be Client
-			setUsername();	//get user name
-			setClientGUI();
-		}
-		else if(input<0){
-			System.exit(0);
-		}	
-		
-	}// GameGUI();
+		serverButton.addActionListener(new ActionListener() 
+		{
+			@Override
+			public void actionPerformed(ActionEvent e) 
+			{
+				userName = "Host";
+				setServerGUI();
+			}
+		});	
+	}
 	
-	private void setServerGUI(){
-		// set up the buttons for server
+	/**
+	 * Sets up the initial server GUI to connect to a port
+	 */
+	private void setServerGUI()
+	{
+		remove(firstPanel); //Remove the first panel
+		setSize(300,200);
 
-				drawButton = new JButton("New Card");
-				discardButton = new JButton("Discarded Card");
-				startGameButton = new JButton("Start Game");
-				
-				//chat related button
-				serverConnectButton = new JButton("Connect");
-				serverConnectButton.addActionListener(this);
-				
-				serverDisconnectButton = new JButton("Disconnect");
-				serverDisconnectButton.addActionListener(this);
-				
-				serverPrivButton = new JButton("Private Chat");
-				serverPrivButton.addActionListener(this);
-				
-				
-				button_Panel = new JPanel(new GridLayout(2,3));
-				button_Panel.add(drawButton);
-				button_Panel.add(discardButton);
-				button_Panel.add(startGameButton);
-				button_Panel.add(serverConnectButton);
-				button_Panel.add(serverDisconnectButton);
-				button_Panel.add(serverPrivButton);
-				
-				String displayString = "Server "+portString;
-				
-				commonGUI(displayString);
-				
+		// Initialize the new panel
+		JPanel serverPanel = new JPanel(new GridLayout(3,1));
+		add(serverPanel);
+
+		JLabel serverWelcome = new JLabel("Enter the port you will connect to");
+		serverPanel.add(serverWelcome,SwingConstants.CENTER);
+
+		// Show the port being connected to. Currently set to 0 (default)
+		portTextField = new JTextField();
+		portTextField.setText("0");
+		serverPanel.add(portTextField);
+
+		//connect button....this will bring up a new screen if clicked
+		serverConnect = new JButton("Connect");
 		
+		serverPanel.add(serverConnect);
+		serverConnect.addActionListener(this);
+
+		validate();//change the window
+		repaint();	
 	}
 		
-	private void setClientGUI(){
+	/**
+	 * Sets up the default game GUI
+	 * 
+	 * @param type	0 = server, 1 = client
+	 */
+	private void setDefaultGUI(int type)
+	{
 		
-		// set up the buttons for server
-		drawButton = new JButton("New Card");
-		discardButton = new JButton("Discarded Card");
+		if (type == 1)
+		{
+			remove(firstPanel);
+			setUsername(); //set username if client
+		}
+		
+		//---------------------------------------------------------
+		// Set up the buttons for the window
+		//---------------------------------------------------------
+		drawButton = new JButton("Draw Card");
+		drawFromDiscardButton = new JButton("Draw Discarded");
+		startGameButton = new JButton("Start Game");
 		clientConnectButton = new JButton("Connect");
-		clientDisconnectButton = new JButton("Disconnect");
-		clientPrivButton = new JButton("Private Chat");
+		disconnectButton = new JButton("Disconnect");
+		privateMessageButton = new JButton("Private Message");
+	
+		// Set up the action listeners
+		drawButton.addActionListener(this);
+		drawFromDiscardButton.addActionListener(this);
+		privateMessageButton.addActionListener(this);
+		startGameButton.addActionListener(this);
+		clientConnectButton.addActionListener(this);
+		disconnectButton.addActionListener(this);
 		
+		// Add the buttons to a Panel
 		button_Panel = new JPanel(new GridLayout(2,3));
 		button_Panel.add(drawButton);
-		button_Panel.add(discardButton);
-		button_Panel.add(clientConnectButton);
-		button_Panel.add(clientDisconnectButton);
-		button_Panel.add(clientPrivButton);
-		
-		commonGUI(userName);
-	}
-		
-	private void commonGUI(String display){
-		//choose server
-		
-				superFrame = new JFrame(display);
-				superFrame.setResizable(false);
-				
-				mainMenuBar = new JMenuBar();
-				superFrame.setJMenuBar(mainMenuBar);
-				
-				gameMenu = new JMenu("Game(G)");
-				gameMenu.setMnemonic('G');
-				chatMenu = new JMenu("Chat(C)");
-				chatMenu.setMnemonic('C');
-				helpMenu = new JMenu("Help(H)");
-				helpMenu.setMnemonic('H');
-				windowMenu = new JMenu("Window(W)");
-				windowMenu.setMnemonic('W');
-				
-				mainMenuBar.add(gameMenu);
-				mainMenuBar.add(chatMenu);
-				mainMenuBar.add(helpMenu);
-				mainMenuBar.add(windowMenu);
-				
-				exitItem = new JMenuItem("Exit ALL");
-				exitItem.addActionListener(new ActionListener() {
-					
-					@Override
-					public void actionPerformed(ActionEvent e) {
-						// TODO Auto-generated method stub
-						//may be need to exit chat and game before exit all
-						System.exit(0);
-					}
-				});
-				
-				exitChat = new JMenuItem("Exit Chat");
-				exitChat.addActionListener(new ActionListener() {
-					
-					@Override
-					public void actionPerformed(ActionEvent e) {
-						// TODO Auto-generated method stub
-						
-					}
-				});
-				
-				exitGame = new JMenuItem("Exit Game");
-				exitGame.addActionListener(new ActionListener() {
-					
-					@Override
-					public void actionPerformed(ActionEvent e) {
-						// TODO Auto-generated method stub
-						
-					}
-				});
-				
-				startChatItem = new JMenuItem("Start Chat");
-				startChatItem.addActionListener(new ActionListener() {
-					
-					@Override
-					public void actionPerformed(ActionEvent e) {
-						// TODO Auto-generated method stub
-						
-					}
-				});
-				
-				startGameItem = new JMenuItem("New Game");
-				startGameItem.addActionListener(new ActionListener() {
-					
-					@Override
-					public void actionPerformed(ActionEvent e) {
-						// TODO Auto-generated method stub
-						
-					}
-				});
-				
-				helpItem = new JMenuItem("Help(V)");
-				helpItem.addActionListener(new ActionListener() {
-					
-					@Override
-					public void actionPerformed(ActionEvent e) {
-						// TODO Auto-generated method stub
-						JOptionPane.showMessageDialog(null," Needs Help?");
+		button_Panel.add(drawFromDiscardButton);
+		button_Panel.add(privateMessageButton);
+		if (type == 0)
+			button_Panel.add(startGameButton);
+		else
+			button_Panel.add(clientConnectButton);
+		button_Panel.add(disconnectButton);
 
-					}
-				});
-				
-				aboutItem = new JMenuItem("About(A)");
-				aboutItem.addActionListener(new ActionListener() {
-					
-					@Override
-					public void actionPerformed(ActionEvent e) {
-						// TODO Auto-generated method stub
-						JOptionPane.showMessageDialog(null, "Made by:\n Adam Socik\n Ryan Szymkiewicz\n Joshua Maravelias\n Tongtong Liu");
-					}
-				});
-				
-				gameMenu.add(startGameItem);
-				gameMenu.add(exitGame);
-				
-				chatMenu.add(startChatItem);
-				chatMenu.add(exitChat);
-				
-				helpMenu.add(helpItem);
-				helpMenu.add(aboutItem);
-				
-				windowMenu.add(exitItem);
-				
-				//panels	
-				Panel_East=new JPanel();
-				Panel_West=new JPanel();
-				Panel_South=new JPanel();
-				Panel_North=new JPanel();
-				Panel_Center=new JPanel();
+		JLabel portLabel = new JLabel();
+		portLabel.setHorizontalAlignment(SwingConstants.CENTER);
+		if (type == 0)
+			portLabel.setText("Port: " + serverPort);
+		else
+			portLabel.setText("Port: " + clientPort);
+		button_Panel.add(portLabel);
+		
+		//---------------------------------------------------------
+		// Set up the menu bar and the window
+		//---------------------------------------------------------
+		superFrame = new JFrame();
+		superFrame.setResizable(false);
+		
+		if (type == 0)
+			superFrame.setTitle("Host");
+		else 
+			superFrame.setTitle(userName);
+		
+		mainMenuBar = new JMenuBar();
+		superFrame.setJMenuBar(mainMenuBar);
+		
+		gameMenu = new JMenu("Game");		
+		mainMenuBar.add(gameMenu);
 
-				superFrame.setLayout(new BorderLayout());
-				superFrame.add(Panel_East,BorderLayout.EAST);
-				superFrame.add(Panel_West,BorderLayout.WEST);
-				superFrame.add(Panel_South,BorderLayout.SOUTH);
-				superFrame.add(Panel_North,BorderLayout.NORTH);
-				superFrame.add(Panel_Center,BorderLayout.CENTER);
-				
-				//center panel is the game panel
-				Panel_Center.setSize(200, 500);
-				
-				playArea = new JTextArea();
-				JScrollPane playScrollPane = new JScrollPane(playArea,
-						JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-						JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-				playScrollPane.setPreferredSize(new Dimension(200,200));
-				
-				Panel_Center.setLayout(new BorderLayout());
-				Panel_Center.add(playScrollPane, BorderLayout.SOUTH);
-				Panel_Center.add(button_Panel, BorderLayout.NORTH);
+		exitItem = new JMenuItem("Exit");
+		aboutItem = new JMenuItem("About");
+		helpItem = new JMenuItem("Help");
+		
+		exitItem.addActionListener(this);
+		aboutItem.addActionListener(this);
+		helpItem.addActionListener(this);
+		
+		gameMenu.add(helpItem);
+		gameMenu.add(aboutItem);
+		gameMenu.add(exitItem);
+		
+		
+		//---------------------------------------------------------
+		// Set up the rest of the various GUI features
+		//---------------------------------------------------------
+		Panel_East=new JPanel();
+		connectionPanel=new JPanel();
+		Panel_South=new JPanel();
+		Panel_North=new JPanel();
+		Panel_Center=new JPanel();
+
+		superFrame.setLayout(new BorderLayout());
+		superFrame.add(Panel_East,BorderLayout.EAST);
+		superFrame.add(connectionPanel,BorderLayout.WEST);
+		superFrame.add(Panel_South,BorderLayout.SOUTH);
+		superFrame.add(Panel_North,BorderLayout.NORTH);
+		superFrame.add(Panel_Center,BorderLayout.CENTER);
+		
+		//center panel is the game panel
+		Panel_Center.setSize(200, 500);
+		
+		playArea = new JTextArea();
+		playArea.setEditable(false);
+		JScrollPane playScrollPane = new JScrollPane(playArea);
+		playScrollPane.setPreferredSize(new Dimension(200,200));
+		
+		Panel_Center.setLayout(new BorderLayout());
+		Panel_Center.add(button_Panel, BorderLayout.NORTH);
+		Panel_Center.add(playScrollPane, BorderLayout.SOUTH);
+		
+		melds_Panel = new JPanel();
+		melds_Panel.setSize(200, 100);
+		
+		enterCommand = new JButton("Enter Command");
+		enterCommand.addActionListener(this);
+		
+		JPanel gamePanel = new JPanel(new BorderLayout());
+		gameInteractionArea = new JTextArea("Type Commands Here");
+		JScrollPane scroll = new JScrollPane(gameInteractionArea);
+		
+		JPanel commandPanel = new JPanel(new BorderLayout());
+		commandPanel.add(enterCommand, BorderLayout.EAST);
+		commandPanel.add(scroll, BorderLayout.CENTER);
+		
+		gamePanel.add(commandPanel, BorderLayout.SOUTH);
+		gamePanel.add(melds_Panel, BorderLayout.CENTER);
+		Panel_Center.add(gamePanel, BorderLayout.CENTER);
+		
+		//add message display area on the east side
+		messageArea = new JTextArea("Messages:\n");
+		messageArea.setEditable(false);
+        JScrollPane scrollPane = new JScrollPane(messageArea,
+                JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+                JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.setPreferredSize(new Dimension(300, 500));
+        Panel_East.add(scrollPane);
+        
+        //create a new JPanel to keep track of current connections
+		connectionPanel.setPreferredSize(new Dimension(200,500));
+		Border connectionPanelBorder = BorderFactory.createTitledBorder("Connected Users");
+		connectionPanel.setBorder(connectionPanelBorder);
+		connectionPanel.setBackground(Color.WHITE);
+		connectedUsers = new JLabel();
+		connectionPanel.add(connectedUsers);
+        
+		//add text typing field on the south side
+		//create text area where messages will be typed
+		clientMessageArea = new JTextArea();
+		Border messageBorder = BorderFactory.createLineBorder(Color.black);
+		clientMessageArea.setBorder(messageBorder);
+		clientMessageArea.setText("Type Message Here");
+		JScrollPane scrollPane3 = new JScrollPane(clientMessageArea, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS
+				, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		scrollPane3.setPreferredSize(new Dimension(800,25));
+		
+		sendButton = new JButton("Send");
+		sendButton.addActionListener(this);
+		Panel_South.add(scrollPane3);
+		Panel_South.add(sendButton);
+		
+		superFrame.setSize(1000, 600);
+		superFrame.setLocation((Toolkit.getDefaultToolkit().getScreenSize().width-superFrame.getSize().width)/2,
+				(Toolkit.getDefaultToolkit().getScreenSize().height-superFrame.getSize().height)/2);
 			
-				
-				melds_Panel = new JPanel();
-				melds_Panel.setSize(200, 100);
-				
-				JPanel gamePanel = new JPanel(new BorderLayout());
-				gameInteractionArea = new JTextArea("Type commands here");
-				JScrollPane scroll = new JScrollPane(gameInteractionArea);
-				gamePanel.add(scroll, BorderLayout.SOUTH);
-				gamePanel.add(melds_Panel, BorderLayout.CENTER);
-				Panel_Center.add(gamePanel, BorderLayout.CENTER);
-				
-				//add message display area on the east side
-				messageArea = new JTextArea("Chatting\n");
-				messageArea.setEditable(false);
-		        JScrollPane scrollPane = new JScrollPane(messageArea,
-		                JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-		                JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		        scrollPane.setPreferredSize(new Dimension(300, 500));
-		        Panel_East.add(scrollPane);
-		        
-		        // add online people display area on the west side
-				peopleArea = new JTextArea("Online member\n");
-				peopleArea.setEditable(false);
-				JScrollPane scrollPane2 = new JScrollPane(peopleArea,
-						JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-						JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-				scrollPane2.setPreferredSize(new Dimension(200,500));
-				Panel_West.add(scrollPane2);
-				
-				//add text typing field on the south side
-				//create text area where messages will be typed
-				clientMessageArea = new JTextArea();
-				Border messageBorder = BorderFactory.createLineBorder(Color.black);
-				clientMessageArea.setBorder(messageBorder);
-				clientMessageArea.setText("Type Here");
-				JScrollPane scrollPane3 = new JScrollPane(clientMessageArea, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS
-						, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-				scrollPane3.setPreferredSize(new Dimension(800,25));
-				
-				sendButton = new JButton("Send");
-				sendButton.addActionListener(this);
-				Panel_South.add(scrollPane3);
-				Panel_South.add(sendButton);
-				
-				superFrame.setSize(1000, 600);
-				superFrame.setLocation((Toolkit.getDefaultToolkit().getScreenSize().width-superFrame.getSize().width)/2,
-						(Toolkit.getDefaultToolkit().getScreenSize().height-superFrame.getSize().height)/2);
-					
-				superFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-				superFrame.validate();
-				superFrame.setVisible(true);
-	} //common GUI
+		superFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		superFrame.validate();
+		superFrame.setVisible(true);
+	}
+	
+	/**
+	 * Implements all the various actions in from the GUI
+	 */
+	public void actionPerformed(ActionEvent e) 
+	{
+		if (e.getSource() == exitItem) { System.exit(0);}
 		
+		if (e.getSource() == aboutItem)
+		{
+			JOptionPane.showMessageDialog(null, "Authors:\n Adam Socik\n Ryan Szymkiewicz\n Joshua Maravelias\n Tongtong Liu");
+		}
+		
+		// Show rules
+		if (e.getSource() == helpItem)
+		{
+			String message = "To play enter a command and the number(s) of the card\n"
+					+ "to be acted upon separated by a space. Examples:\n\n"
+					+ "Hand: 0   1   2   3   4\n"
+					+ "          3C 4S 4H 4C 7D\n\n"
+					+ "Commands:\n"
+					+ "M = meld\tExample: \"M 2 3 4\"\n"
+					+ "L = lay off\tExample: \"L a 4\"\n"
+					+ "                                    ^meld to add to if there is one\n"
+					+ "D = discard\tExample: \"D 0\"\n"
+					+ "Discard 1 card to end your turn\n\n";
+			
+			JOptionPane.showMessageDialog(null, message);
+		}
+		
+		if (e.getSource() == enterCommand)
+		{
+			
+		}
+		
+		// Start up server
+		if (e.getSource() == serverConnect)
+		{
+			String tempPort = portTextField.getText();
+			serverPort = Integer.parseInt(tempPort);
+			server = new ServerHandle(serverPort);
+			System.out.println(server.getPort());	
+			serverPort = server.getPort();
+			remove(this);
+			setDefaultGUI(0);
+			client = new Client(serverPort, this);
+		}
+		
+		// Send a message as a client
+		if (e.getSource() == sendButton)
+		{
+			String message = clientMessageArea.getText();
+			
+			try 
+			{
+				client.send("0", message);
+				clientMessageArea.setText("");	// Clears out old text
+			} 
+			catch (IOException e1)
+			{
+				e1.printStackTrace();
+			}
+			
+		}
+		
+		// Disconnect as a client
+		if(e.getSource() == disconnectButton)
+		{
+			try 
+			{
+				client.disconnect();
+			} 
+			catch (IOException e1) 
+			{
+				e1.printStackTrace();
+			}
+		}
+		
+		// Connect as a client
+		if(e.getSource() == clientConnectButton)
+		{
+			client = new Client(clientPort, this);
+		}
+		
+		if (e.getSource() == startGameButton)
+		{
+			try {
+				client.startGame(server.getUserCounter());
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			
+			
+		}
+		
+		//private message as a client
+		//this code was modified from ideas found at:
+		//http://stackoverflow.com/questions/6555040/
+		//multiple-input-in-joptionpane-showinputdialog
+		//The fields are initialized as JTextFields that are placed into
+		//a JPanel
+		//This panel has a gridLayout and the previous fields are added to the
+		//panel.  Then JOptionPane is passed this panel and a 
+		//window with the fields and "Cancel" and "OK" appears.
+		//If text is entered and OK is pressed,  a private message should be sent
+		//this code was modified from the original source
+		//through the different text areas that are needed and the way
+		//that the panel was set up.
+		if(e.getSource() == privateMessageButton)
+		{
+			JTextField people = new JTextField(25);
+			JTextField message = new JTextField(50);
+			JLabel peopleLabel = new JLabel("Enter the people you wish to \n"
+					+ "chat with separated with a space\n.");
+			JLabel messageLabel = new JLabel("Enter your message \n");
+
+			JPanel privateMessagePanel = new JPanel(new GridLayout(4,1));
+			privateMessagePanel.add(peopleLabel);
+			privateMessagePanel.add(people);
+
+			privateMessagePanel.add(messageLabel);
+			privateMessagePanel.add(message);
+
+			int check = JOptionPane.showConfirmDialog(
+							null,
+							privateMessagePanel,
+							"Enter your message and recipients",
+							JOptionPane.OK_CANCEL_OPTION);
+			if(check == JOptionPane.OK_OPTION){
+				privateMessagePeople=people.getText();
+				privateMessageContent=message.getText();
+				
+				privateMessagePeople += " " + userName; // Add so sender can also see message
+				
+				try { client.send(privateMessagePeople, privateMessageContent); } 
+				catch (IOException e1) { e1.printStackTrace(); }
+			}
+		}
+	}
+	
+	/**
+	 * Prints the string s to play area - prints any game relevant information
+	 * 
+	 * @param s
+	 */
+	public void printToPlayArea(String s)
+	{
+		playArea.append(s);
+	}
+	
 	/**
 	 * Notify player that card was drawn
 	 * 
@@ -331,12 +443,12 @@ public class GameGUI implements ActionListener {
 	 */
 	public void draw(int from) 
 	{
-		player.drawCard(from);
+		//player.drawCard(from);
 	}
 
 	public void setDiscardBtnText(String s)
 	{
-		discardButton.setText("Draw " + s);
+		drawFromDiscardButton.setText("Draw " + s);
 	}
 
 	public JTextArea getPlayArea()
@@ -383,10 +495,6 @@ public class GameGUI implements ActionListener {
 
 			userName = tUserName;//if user pressed OK and field is valid,  set name
 			clientPort = Integer.parseInt(tPort);//set port
-
-			System.out.print(userName);
-			System.out.print(clientPort);
-
 		}
 
 		//if the user pressed cancel or did not enter a name,
@@ -418,7 +526,6 @@ public class GameGUI implements ActionListener {
 		}
 		namePanel.setName(userName);
 	}
-	
 
 	/*****************
 	 * These getters are used by the server and client
@@ -429,8 +536,8 @@ public class GameGUI implements ActionListener {
 		return serverPort;
 	}
 
-	public JPanel getConnectWindow(){
-		return Panel_West;	//member list
+	public JLabel getConnectWindow(){
+		return connectedUsers;	//member list
 	}
 
 	public JTextArea getChatWindow(){
@@ -461,123 +568,14 @@ public class GameGUI implements ActionListener {
 		privateMessageContent = null;
 		return tempMessage;
 	}
-
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	/*****************
-	 * This method allows for interaction when buttons are pressed
-	 */
-/*	public void actionPerformed(ActionEvent e) {
-
-		//if using as server,  after connnect has been pressed,
-		//set the port to the class variable and switch panels
-		//that displays the port
-		if(e.getSource() == serverConnectButton){
-			server = new ServerHandle(0);
-			String tempPort = portTextField.getText();
-			serverPort = Integer.parseInt(tempPort);
-			remove(serverPanel);
-			serverInfoPanel = new JPanel();
-			add(serverInfoPanel);
-			JLabel info = new JLabel("You are connected to port: "+ server.getPort());
-			serverInfoPanel.add(info);
-			System.out.println(server.getPort());
-			validate();//change the window
-			repaint();
-		}
-
-		//exit the window
-		else if(e.getSource() == clientExit){
-			System.exit(0);
-		}
-
-		//connect as a client
-		else if(e.getSource() == clientConnect)
-		{
-			client = new Client(clientPort, this);
-		}
-
-		//disconnect as a client
-		else if(e.getSource() == clientDisconnect){
-			try 
-			{
-				client.disconnect();
-			} 
-			catch (IOException e1) 
-			{
-				e1.printStackTrace();
-			}
-		}
-
-		//send a message as a client
-		else if(e.getSource() == clientSend)
-		{
-			String message = clientMessageArea.getText();
-		
-			try 
-			{
-				client.send("0", message);
-				clientMessageArea.setText("");	// Clears out old text
-			} 
-			catch (IOException e1)
-			{
-				e1.printStackTrace();
-			}
-		}
-
-		//private message as a client
-		//this code was modified from ideas found at:
-		//http://stackoverflow.com/questions/6555040/
-		//multiple-input-in-joptionpane-showinputdialog
-		//The fields are initialized as JTextFields that are placed into
-		//a JPanel
-		//This panel has a gridLayout and the previous fields are added to the
-		//panel.  Then JOptionPane is passed this panel and a 
-		//window with the fields and "Cancel" and "OK" appears.
-		//If text is entered and OK is pressed,  a private message should be sent
-		//this code was modified from the original source
-		//through the different text areas that are needed and the way
-		//that the panel was set up.
-		else if(e.getSource() == clientMultipleMessages){
-			JTextField people = new JTextField(25);
-			JTextField message = new JTextField(50);
-			JLabel peopleLabel = new JLabel("Enter the people you wish to \n"
-					+ "chat with separated with a space\n.");
-			JLabel messageLabel = new JLabel("Enter your message \n");
-
-			JPanel privateMessagePanel = new JPanel(new GridLayout(4,1));
-			privateMessagePanel.add(peopleLabel);
-			privateMessagePanel.add(people);
-
-			privateMessagePanel.add(messageLabel);
-			privateMessagePanel.add(message);
-
-			int check = JOptionPane.showConfirmDialog(
-							null,
-							privateMessagePanel,
-							"Enter your message and recipients",
-							JOptionPane.OK_CANCEL_OPTION);
-			if(check == JOptionPane.OK_OPTION){
-				privateMessagePeople=people.getText();
-				privateMessageContent=message.getText();
-				
-				privateMessagePeople += " " + userName; // Add so sender can also see message
-				
-				try { client.send(privateMessagePeople, privateMessageContent); } 
-				catch (IOException e1) { e1.printStackTrace(); }
-			}
-		}
-		else{
-			System.out.println("Problem with button press");
-		}
-
+	
+	
+	public static void main(String[] args)
+	{
+		GameGUI gui = new GameGUI();
+		gui.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE );
 	}
 	
-	*/
 }// end Class
 	
 

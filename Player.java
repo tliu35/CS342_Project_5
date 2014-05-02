@@ -7,32 +7,144 @@
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Vector;
-
 import javax.swing.JPanel;
 
 public class Player 
 {
-	private Vector<Card> hand;
-	private GameGUI gui;
-	private Client client;
-	private Deck deck;
+	public Vector<Card> hand;
 	private boolean drewCard;
 	private int from = 0;
 	
-	public Player(GameGUI gui, Client client, Deck deck)
+	public Player(Deck deck)
 	{
 		hand = new Vector<Card>();
-		this.gui = gui;
-		this.client = client;
-		this.deck = deck;
 		drewCard = false;
 	}
 	
+	public void setGUIandClient(GameGUI gui, Client client)
+	{
+		hand = new Vector<Card>();
+	}
+	
+	/**
+	 * Sorts a list of cards by rank. 
+	 */
+	private void sortCards(Vector<Card> cards)
+	{
+		Collections.sort(cards, new Comparator<Card>()
+		{
+			@Override
+			public int compare (Card c1, Card c2)
+			{
+				if (c1.getNumericRank() > c2.getNumericRank())
+					return 1;
+				else if (c1.getNumericRank() < c2.getNumericRank())
+					return -1;
+				else 
+					return 0;
+			}
+		});
+	}
+	
+	/**
+	 * Prints out the cards in the player's hand
+	 */
+	public String printHand()
+	{
+		sortCards(hand);		// Sort hand for printing
+		StringBuilder builder = new StringBuilder();
+		
+		for (int i=0; i<hand.size(); i++)
+		{
+			if (i<10)
+				builder.append(i + "     " + hand.get(i).getCard() + "\n");
+			else
+				builder.append(i + "    " + hand.get(i).getCard() + "\n");
+		}
+				
+		builder.append("\n");
+		builder.append("\n");
+		
+		return builder.toString();
+	}
+	
+	/**
+	 * Flags that user has drawn a card
+	 */
+	public void drawCard(int from)
+	{ 
+		drewCard = true;
+		this.from = from;
+	}
+	
+	/** 
+	 * @return list of the player's hand of cards 
+	 */
+	public Vector<Card> getHand()
+	{
+		return hand;
+	}
+	
+	/**
+	 * Removes the cards specified in the input array of indexes in the hand.
+	 * Note that error checking is not necessary since it was done prior to 
+	 * this method call.
+	 * 
+	 * @param input		String array of indexes
+	 * @param start		Where to start looping through 
+	 */
+	private void removeCards(String input[], int start)
+	{
+		for (int i=start; i<input.length; i++)
+			hand.remove(Integer.parseInt(input[i]));
+	}
+	
+	/**
+	 * Method check to see if a player has won the game, and notifies the server if
+	 * the do. A game is won when the play has no cards in their hand.
+	 */
+	private void checkForWinner()
+	{
+		if (hand.size() == 0)
+		{
+			// ******************** TO DO: Send message to server ********************
+			// This player has won - notify all other players and stop the game
+			 
+		}
+	}
+	
+	/**
+	 * Takes input array of stings, converts values to indexes in hand vector,
+	 * adds cards from hand to a list that will be used for melds. Cards in the
+	 * hand are not removed yet.
+	 * 
+	 * @param list		Destination for cards
+	 * @param input		String array of indexes
+	 * @param start		Where to start looping through 
+	 * @return			true/false if all values are valid (not out of range)
+	 */
+	private boolean intputToCards(Vector<Card> list, String input[], int start)
+	{
+		for (int i=start; i<input.length; i++)
+		{
+			int index = Integer.parseInt(input[i]);
+			if (index < 0 || index > hand.size()) 	// Not in vector size range
+			{
+				//gui.getPlayArea().append("You specified cards not in the range\n\n");
+				return false;
+			}
+			list.add(hand.get(index));
+		}
+		return true;
+	}
+
+
+	/*
 	public void executeTurn()
 	{
 		//----------------------------------------------------------------
-        // Draw phase
-        //----------------------------------------------------------------
+	    // Draw phase
+	    //----------------------------------------------------------------
 		
 		// Print rules for draw phase
 		String message = "Draw a card from the deck or from the top of the discard pile\n\n";
@@ -55,9 +167,9 @@ public class Player
 			{
 				hand.add(card);
 				
-				/* ******************** TO DO: Send message to all users ********************
-				 * message: client.username + " drew " + card.getCard() + "from the discard pile\n"
-				 */
+				// ******************** TO DO: Send message to all users ********************
+				// message: client.username + " drew " + card.getCard() + "from the discard pile\n"
+				
 			}
 		}
 		else // Draw from deck
@@ -68,8 +180,8 @@ public class Player
 		// ******************** TO DO: disable draw buttons ********************
 		
 		//----------------------------------------------------------------
-        // Optional phase - user can chose to meld or lay off cards
-        //----------------------------------------------------------------
+	    // Optional phase - user can chose to meld or lay off cards
+	    //----------------------------------------------------------------
 		message = "To play enter a command and the number(s) of the card\n"
 				+ "to be acted upon separated by a space. Examples:\n\n"
 				+ "Hand: 0  1  2  3  4\n"
@@ -94,7 +206,7 @@ public class Player
 			
 			if (input[0].compareTo("M") == 0)	// Meld
 			{
-				// Translate input to cardo\0q	2	wy7i9o0-55 tvin
+				// Translate input to card
 				Vector<Card> tempCards = new Vector<Card>();
 				intputToCards(tempCards, input, 1);
 				sortCards(tempCards);
@@ -113,11 +225,11 @@ public class Player
 					// Update the melds for all users
 					gui.setMeldsPanel(deck.updateGUIMelds());
 					
-					/* ******************** TO DO: Send message to all users ********************
-					 * message: client.username + " created meld " + meld.getName() + "\n"
-					 * 
-					 * print out cards added
-					 */
+					// ******************** TO DO: Send message to all users ********************
+					// message: client.username + " created meld " + meld.getName() + "\n"
+					 
+					// print out cards added
+					
 					
 					checkForWinner();
 				}
@@ -163,11 +275,11 @@ public class Player
 					// Update the melds for all users
 					gui.setMeldsPanel(deck.updateGUIMelds());
 					
-					/* ******************** TO DO: Send message to all users ********************
-					 * message: client.username + " laid off to meld " + meld.getName() + "\n"
-					 * 
-					 * print out cards added
-					 */
+					// ******************** TO DO: Send message to all users ********************
+					// message: client.username + " laid off to meld " + meld.getName() + "\n"
+					  
+					// print out cards added
+					
 					
 					checkForWinner();
 				}
@@ -185,9 +297,9 @@ public class Player
 				{
 					deck.addToDiscardPile(hand.get(index));
 					
-					/* ******************** TO DO: Send message to all users ********************
-					 * message: client.username + " discarded " + hand.get(index).getCard() + "\n"
-					 */
+					// ******************** TO DO: Send message to all users ********************
+					// message: client.username + " discarded " + hand.get(index).getCard() + "\n"
+					
 					
 					hand.remove(index);
 					checkForWinner();
@@ -199,128 +311,13 @@ public class Player
 				gui.getPlayArea().append("You entered an invalid command\n");
 			}
 		}
-	
-		/* ******************** TO DO: Send message to server ********************
-		 * message: this client is done with its turn
-		 */
-	}
 
-	/**
-	 * Sorts a list of cards by rank. 
-	 */
-	private void sortCards(Vector<Card> cards)
-	{
-		Collections.sort(cards, new Comparator<Card>()
-		{
-			@Override
-			public int compare (Card c1, Card c2)
-			{
-				if (c1.getNumericRank() > c2.getNumericRank())
-					return 1;
-				else if (c1.getNumericRank() < c2.getNumericRank())
-					return -1;
-				else 
-					return 0;
-			}
-		});
-	}
-	
-	/**
-	 * Prints out the cards in the player's hand
-	 */
-	private void printHand()
-	{
-		sortCards(hand);		// Sort hand for printing
-		StringBuilder builder = new StringBuilder();
+		// ******************** TO DO: Send message to server ********************
+		// message: this client is done with its turn
 		
-		for (int i=0; i<hand.size(); i++)
-		{
-			if (i<10)
-				builder.append(i + "  ");
-			else
-				builder.append(i + " ");
-		}
-		
-		builder.append("\n");
-		
-		for (int i=0; i<hand.size(); i++)
-			builder.append(hand.get(i).getCard() + " ");
-		
-		builder.append("\n");
-		builder.append("\n");
-		
-		gui.getPlayArea().append(builder.toString());
 	}
-	
-	/**
-	 * Flags that user has drawn a card
-	 */
-	public void drawCard(int from)
-	{ 
-		drewCard = true;
-		this.from = from;
-	}
-	
-	/** 
-	 * @return list of the player's hand of cards 
-	 */
-	public Vector<Card> getHand()
-	{
-		return hand;
-	}
-	
-	/**
-	 * Takes input array of stings, converts values to indexes in hand vector,
-	 * adds cards from hand to a list that will be used for melds. Cards in the
-	 * hand are not removed yet.
-	 * 
-	 * @param list		Destination for cards
-	 * @param input		String array of indexes
-	 * @param start		Where to start looping through 
-	 * @return			true/false if all values are valid (not out of range)
-	 */
-	private boolean intputToCards(Vector<Card> list, String input[], int start)
-	{
-		for (int i=start; i<input.length; i++)
-		{
-			int index = Integer.parseInt(input[i]);
-			if (index < 0 || index > hand.size()) 	// Not in vector size range
-			{
-				gui.getPlayArea().append("You specified cards not in the range\n\n");
-				return false;
-			}
-			list.add(hand.get(index));
-		}
-		return true;
-	}
-	
-	/**
-	 * Removes the cards specified in the input array of indexes in the hand.
-	 * Note that error checking is not necessary since it was done prior to 
-	 * this method call.
-	 * 
-	 * @param input		String array of indexes
-	 * @param start		Where to start looping through 
-	 */
-	private void removeCards(String input[], int start)
-	{
-		for (int i=start; i<input.length; i++)
-			hand.remove(Integer.parseInt(input[i]));
-	}
-	
-	/**
-	 * Method check to see if a player has won the game, and notifies the server if
-	 * the do. A game is won when the play has no cards in their hand.
-	 */
-	private void checkForWinner()
-	{
-		if (hand.size() == 0)
-		{
-			/* ******************** TO DO: Send message to server ********************
-			 * This player has won - notify all other players and stop the game
-			 */
-		}
-	}
+	*/
+
 }
 
 

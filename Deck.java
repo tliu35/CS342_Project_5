@@ -5,7 +5,6 @@
  * 
  * Class holds all variables and methods needed to manipulate a deck of cards
  * ------------------------------------------------------------------------*/
-import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.util.*;
 
